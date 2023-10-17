@@ -152,6 +152,8 @@ export default Gameboard = ({navigation, route}) => {
         setStatus('Select and throw dices again');
     }
 
+    // Alerting the player about the game ending.
+
     const gameOverAlert = () =>
     Alert.alert('Game over!', 'The game came to the end. Start a new game by throwing dices.', [
       {
