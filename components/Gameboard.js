@@ -51,9 +51,9 @@ export default Gameboard = ({navigation, route}) => {
     for (let spot = 0; spot < MAX_SPOT; spot++) {
         pointsRow.push(
             <Col key={"pointsRow" + spot}>
-                <Text key={"pointsRow" + spot}>
-                    {getSpotTotal(spot)}
-                </Text>
+                    <Text key={"pointsRow" + spot}>
+                        {getSpotTotal(spot)}
+                    </Text>
             </Col>
         )
     }
@@ -153,7 +153,7 @@ export default Gameboard = ({navigation, route}) => {
     }
 
     function getDicePointsColor(i) {
-        return (selectedDicePoints[i] && gameEndStatus) ? "black" : "steelblue";
+        return selectedDicePoints[i] ? "black" : "steelblue";
     }
 
     useEffect(() => {
