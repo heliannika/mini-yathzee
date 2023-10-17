@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, Alert } from "react-native";
 import Header from './Header';
 import Footer from './Footer';
 import { NBR_OF_DICES, NBR_OF_THROWS, MIN_SPOT, MAX_SPOT, BONUS_POINTS_LIMIT, BONUS_POINTS } from "../constants/Game";
 import styles from '../style/style';
 import { Container, Row, Col } from 'react-native-flex-grid';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Scoreboard from '../components/Scoreboard';
 
 let board = [];
 
@@ -151,11 +152,20 @@ export default Gameboard = ({navigation, route}) => {
         setStatus('Select and throw dices again');
     }
 
+    const gameOverAlert = () =>
+    Alert.alert('Game over!', 'The game came to the end. Start a new game by throwing dices.', [
+      {
+        text: 'Go to scoreboard',
+        onPress: () => navigation.navigate('Scoreboard'),
+      },
+      {text: 'Start a new game'},
+    ]);
+
     // Function for the new game.
 
     const newGame = () => {
         board = [];
-        alert('The game came to the end. Start a new game by throwing dices.');
+        gameOverAlert();
         setDicePointsTotal(new Array(MAX_SPOT).fill(0));
         setSelectedDicePoints(new Array(MAX_SPOT).fill(false));
         setNbrOfThrowsLeft(NBR_OF_THROWS);
