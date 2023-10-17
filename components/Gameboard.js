@@ -135,7 +135,6 @@ export default Gameboard = ({navigation, route}) => {
         /* Starting the game again after points are selected for every number. */
 
         else if (selectedDicePoints.every((val) => val === true)) {
-            setStatus('The game came to the end. Start a new game by throwing dices.');
             newGame();
         }
 
@@ -156,6 +155,7 @@ export default Gameboard = ({navigation, route}) => {
 
     const newGame = () => {
         board = [];
+        alert('The game came to the end. Start a new game by throwing dices.');
         setDicePointsTotal(new Array(MAX_SPOT).fill(0));
         setSelectedDicePoints(new Array(MAX_SPOT).fill(false));
         setNbrOfThrowsLeft(NBR_OF_THROWS);
