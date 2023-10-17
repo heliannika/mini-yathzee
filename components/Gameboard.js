@@ -160,7 +160,7 @@ export default Gameboard = ({navigation, route}) => {
         text: 'Go to scoreboard',
         onPress: () => navigation.navigate('Scoreboard'),
       },
-      {text: 'Start a new game'},
+      {text: 'Start a new game and throw dices'},
     ]);
 
     // Function for the new game.
