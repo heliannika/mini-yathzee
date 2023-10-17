@@ -23,6 +23,11 @@ export default Gameboard = ({navigation, route}) => {
     const [selectedDicePoints, setSelectedDicePoints] = useState(new Array(MAX_SPOT).fill(false));
     // Kerätyt pisteet
     const [dicePointsTotal, setDicePointsTotal] = useState(new Array(MAX_SPOT).fill(0));
+    //const [isDisabled, setIsDisabled] = useState(false);
+    let dices = [...selectedDices];
+
+    // setSelectedDices(!selectedDices);
+    // setNbrOfThrowsLeft(NBR_OF_THROWS);
 
     const dicesRow = [];
     for (let dice = 0; dice < NBR_OF_DICES; dice++) {
@@ -59,14 +64,14 @@ export default Gameboard = ({navigation, route}) => {
             <Col key={"buttonsRow" + diceButton}>
                 <Pressable
                     key={"buttonsRow" + diceButton}
-                    //onPress={() => selectDicePoints(diceButton)}
+                    onPress={() => selectDicePoints(diceButton)}
                     >
 
                     <MaterialCommunityIcons
                         name={"numeric-" + (diceButton + 1) + "-circle"}
                         key={"buttonsRow" + diceButton}
                         size={35}
-                        // color={getDicePointsColor(diceButton)}
+                        color={getDicePointsColor(diceButton)}
                         >
                     </MaterialCommunityIcons>
                 </Pressable>
@@ -74,13 +79,8 @@ export default Gameboard = ({navigation, route}) => {
         )
     }
 
-    function getSpotTotal(i) {
-        return dicePointsTotal[i];
-    }
-
     const selectDice = (i) => {
         if (nbrOfThrowsLeft < NBR_OF_THROWS && !gameEndStatus) {
-            let dices = [...selectedDices];
             dices[i] = selectedDices[i] ? false : true;
             setSelectedDices(dices);
         }
@@ -89,8 +89,71 @@ export default Gameboard = ({navigation, route}) => {
         }
     }
 
+
+    const selectDicePoints = (i) => {
+        if (nbrOfThrowsLeft === 0) {
+            let selectedPoints = [...selectedDicePoints];
+            let points = [...dicePointsTotal];
+            if (!selectedPoints[i]) {
+                selectedPoints[i] = true;
+                let nbrOfDices = diceSpots.reduce((total, x) => (x === (i + 1) ? total + 1 : total), 0);
+                points[i] = nbrOfDices * (i + 1);
+            }
+            else {
+                setStatus('You already selected points for ' +  (i + 1));
+                return points[i];
+            }
+            setDicePointsTotal(points);
+            setSelectedDicePoints(selectedPoints);
+            setNbrOfThrowsLeft(NBR_OF_THROWS);
+            undoDiceSelection();
+            return points[i];
+        }
+        else {
+            setStatus('Throw ' + NBR_OF_THROWS + ' times before setting points');
+        }
+    }
+
+    // Unselecting the dices during the game.
+
+    const undoDiceSelection = () => {
+        dices.fill(false);
+        setSelectedDices(dices);
+    }
+
+    const throwDices = () => {
+        if (nbrOfThrowsLeft === 0 && !gameEndStatus) {
+            setStatus('Select your points before the next throw');
+            return 1;
+        }
+        else if (nbrOfThrowsLeft === 0 && gameEndStatus) {
+            setGameEndStatus(false);
+            diceSpots.fill(0);
+            dicePointsTotal.fill(0);
+        }
+        let spots = [...diceSpots];
+        for (let i = 0; i < NBR_OF_DICES; i++) {
+            if (!selectedDices[i]) {
+                let randomNumber = Math.floor(Math.random() * 6 + 1);
+                board[i] = 'dice-' + randomNumber;
+                spots[i] = randomNumber;
+            }
+        }
+        setNbrOfThrowsLeft(nbrOfThrowsLeft-1);
+        setDiceSpots(spots);
+        setStatus('Select and throw dices again');
+    }
+
+    function getSpotTotal(i) {
+        return dicePointsTotal[i];
+    }
+
     function getDiceColor(i) {
         return selectedDices[i] ? "black" : "steelblue";
+    }
+
+    function getDicePointsColor(i) {
+        return (selectedDicePoints[i] && gameEndStatus) ? "black" : "steelblue";
     }
 
     useEffect(() => {
@@ -107,12 +170,20 @@ export default Gameboard = ({navigation, route}) => {
                 <Container fluid>
                     <Row>{dicesRow}</Row>
                 </Container>
+                <Text>Throws left: {nbrOfThrowsLeft}</Text>
+                <Text>{status}</Text>
+                <Pressable
+                    onPress={() => throwDices()}
+                    >
+                        <Text>THROW DICES</Text>
+                </Pressable>
                 <Container fluid>
                     <Row>{pointsRow}</Row>
                 </Container>
                 <Container fluid>
                     <Row>{pointsToSelectRow}</Row>
                 </Container>
+                <Text>TOTAL POINTS: {dicePointsTotal}</Text>
                 <Text>Player: {playerName}</Text>
             </View>
             <Footer />
