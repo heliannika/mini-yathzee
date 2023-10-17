@@ -131,6 +131,10 @@ export default Gameboard = ({navigation, route}) => {
             diceSpots.fill(0);
             dicePointsTotal.fill(0);
         }
+        else if (selectedDicePoints.every((val) => val === true)) {
+            newGame();
+        }
+
         let spots = [...diceSpots];
         for (let i = 0; i < NBR_OF_DICES; i++) {
             if (!selectedDices[i]) {
@@ -142,6 +146,12 @@ export default Gameboard = ({navigation, route}) => {
         setNbrOfThrowsLeft(nbrOfThrowsLeft-1);
         setDiceSpots(spots);
         setStatus('Select and throw dices again');
+    }
+
+    const newGame = () => {
+        setDicePointsTotal(0);
+        selectedDicePoints.fill(false);
+        setNbrOfThrowsLeft(NBR_OF_THROWS);
     }
 
     function getSpotTotal(i) {
