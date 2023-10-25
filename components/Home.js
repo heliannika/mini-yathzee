@@ -21,15 +21,15 @@ export default Home = ({navigation}) => {
     return (
         <>
             <Header />
-                <View>
+                <View style={styles.home}>
                     <MaterialCommunityIcons name="information" size={90} color="deeppink" />
                     {!hasPlayerName ?
                         <>
-                            <Text>For scoreboard enter your name...</Text>
+                            <Text style={styles.nameboardText}>Enter your name for scoreboard...</Text>
                             <TextInput onChangeText={setPlayerName} autoFocus={true} />
                             <Pressable
                                 onPress={() => handlePlayerName(playerName)}
-                                ><Text>OK</Text>
+                                ><Text style={styles.button}>Continue</Text>
                             </Pressable>
                         </>
                         :

@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { Pressable, Text, View, Alert } from "react-native";
 import Header from './Header';
 import Footer from './Footer';
-import { NBR_OF_DICES, NBR_OF_THROWS, MIN_SPOT, MAX_SPOT, BONUS_POINTS_LIMIT, BONUS_POINTS } from "../constants/Game";
+import { NBR_OF_DICES, NBR_OF_THROWS, MIN_SPOT, MAX_SPOT, BONUS_POINTS_LIMIT, BONUS_POINTS, SCOREBOARD_KEY } from "../constants/Game";
 import styles from '../style/style';
 import { Container, Row, Col } from 'react-native-flex-grid';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Scoreboard from '../components/Scoreboard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let board = [];
+let diceValues = [];
 
 export default Gameboard = ({navigation, route}) => {
 
@@ -26,6 +28,10 @@ export default Gameboard = ({navigation, route}) => {
     const [dicePointsTotal, setDicePointsTotal] = useState(new Array(MAX_SPOT).fill(0));
     //const [isDisabled, setIsDisabled] = useState(false);
     let dices = [...selectedDices];
+    const [pointsAwayFromBonus, setPointsAwayFromBonus] = useState(63);
+    // Tulostaulun pisteet
+    const [scores, setScores] = useState([]);
+    const [totalPoints, setTotalPoints] = useState(0);
 
     // setSelectedDices(!selectedDices);
     // setNbrOfThrowsLeft(NBR_OF_THROWS);
@@ -108,6 +114,7 @@ export default Gameboard = ({navigation, route}) => {
             setSelectedDicePoints(selectedPoints);
             setNbrOfThrowsLeft(NBR_OF_THROWS);
             undoDiceSelection();
+
             return points[i];
         }
         else {
@@ -120,6 +127,38 @@ export default Gameboard = ({navigation, route}) => {
     const undoDiceSelection = () => {
         dices.fill(false);
         setSelectedDices(dices);
+    }
+
+    const savPlayerPoints = async() => {
+        const newKey = scores.length + 1;
+        const playerPoints = {
+            key: newKey,
+            name: playerName,
+            date: 'pvm',
+            time: 'time',
+            points: totalPoints,
+        }
+        try {
+            const newScore = [...scores, playerPoints];
+            const jsonValue = JSON.stringify(newScore);
+            await AsyncStorage.setItem(SCOREBOARD_KEY, jsonValue);
+        }
+        catch (e) {
+            console.log('Save error: ' + e);
+        }
+    }
+
+    const getScoreboardData = async() => {
+        try {
+            const jsonValue = await AsyncStorage.getItem(SCOREBOARD_KEY);
+            if (jsonValue !== null) {
+                let tmpScores = JSON.parse(jsonValue);
+                setScores(tmpScores);
+            }
+        }
+        catch (e) {
+            console.log('Read error: ' + e);
+        }
     }
 
     const throwDices = () => {
@@ -136,10 +175,12 @@ export default Gameboard = ({navigation, route}) => {
         /* Starting the game again after points are selected for every number. */
 
         else if (selectedDicePoints.every((val) => val === true)) {
+            gameOverAlert();
             newGame();
         }
 
         let spots = [...diceSpots];
+
         for (let i = 0; i < NBR_OF_DICES; i++) {
             if (!selectedDices[i]) {
                 let randomNumber = Math.floor(Math.random() * 6 + 1);
@@ -147,6 +188,16 @@ export default Gameboard = ({navigation, route}) => {
                 spots[i] = randomNumber;
             }
         }
+
+         // Addition for total points
+
+        let sum = 0;
+
+        for (let i of dicePointsTotal) {
+            sum = sum+ i;
+        }
+        setTotalPoints(sum);
+
         setNbrOfThrowsLeft(nbrOfThrowsLeft-1);
         setDiceSpots(spots);
         setStatus('Select and throw dices again');
@@ -155,24 +206,25 @@ export default Gameboard = ({navigation, route}) => {
     // Alerting the player about the game ending.
 
     const gameOverAlert = () =>
-    Alert.alert('Game over!', 'The game came to the end. Start a new game by throwing dices.', [
+    Alert.alert('Game over!', 'The game came to the end. Continue new game by selecting dices or go to scorebaord.', [
       {
         text: 'Go to scoreboard',
         onPress: () => navigation.navigate('Scoreboard'),
       },
-      {text: 'Start a new game and throw dices'},
+      {text: 'Continue the new game'},
     ]);
 
     // Function for the new game.
 
     const newGame = () => {
         board = [];
-        gameOverAlert();
         setDicePointsTotal(new Array(MAX_SPOT).fill(0));
         setSelectedDicePoints(new Array(MAX_SPOT).fill(false));
         setNbrOfThrowsLeft(NBR_OF_THROWS);
         diceSpots.fill(0);
     }
+
+    
 
     function getSpotTotal(i) {
         return dicePointsTotal[i];
@@ -191,6 +243,13 @@ export default Gameboard = ({navigation, route}) => {
             setPlayerName(route.params.player);
         }
     }, []);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            getScoreboardData();
+        });
+        return unsubscribe;
+    }, [navigation]);
 
     return (
         <>
@@ -213,7 +272,11 @@ export default Gameboard = ({navigation, route}) => {
                 <Container fluid>
                     <Row>{pointsToSelectRow}</Row>
                 </Container>
-                <Text>TOTAL POINTS: {dicePointsTotal}</Text>
+                <Pressable
+                    onPress={() => savPlayerPoints()}>
+                    <Text>SAVE POINTS</Text>
+                    <Text>Points total: {totalPoints}</Text>
+                </Pressable>
                 <Text>Player: {playerName}</Text>
             </View>
             <Footer />

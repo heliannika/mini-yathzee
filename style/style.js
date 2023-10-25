@@ -6,7 +6,6 @@ export default StyleSheet.create({
     backgroundColor: '#fff'
   },
   header: {
-    marginTop: 30,
     marginBottom: 15,
     backgroundColor: 'lightpink',
     flexDirection: 'row',
@@ -14,7 +13,9 @@ export default StyleSheet.create({
   footer: {
     marginTop: 20,
     backgroundColor: 'lightpink',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 0
   },
   title: {
     color: '#fff',
@@ -54,15 +55,25 @@ export default StyleSheet.create({
   button: {
     margin: 30,
     flexDirection: "row",
-    padding: 10,
-    backgroundColor: "#73CED6",
-    width: 150,
+    backgroundColor: 'lightpink',
+    width: 130,
+    paddingLeft: 5,
     borderRadius: 15,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    fontSize: 30,
+    fontFamily: 'sans-serif-thin'
   },
   buttonText: {
     color:"#2B2B52",
+    fontSize: 20
+  },
+  home: {
+    alignItems: 'center',
+    padding: 30
+  },
+  nameboardText: {
+    fontFamily: 'sans-serif-thin',
     fontSize: 20
   }
 });
